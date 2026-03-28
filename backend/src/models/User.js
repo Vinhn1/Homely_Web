@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import bcryptjs from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
     username: {
@@ -44,6 +45,30 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+// Là một hàm async. Dùng từ khóa this
+// để truy cập vào dữ liệu của người dùng ngay trước khi nó "bay" vào Database.
+userSchema.pre('save', async function() {
+    // Kiểm tra nếu không đổi mật khẩu thì thoát ra luôn
+    if(!this.isModified('hashedPassword')) return next();
+    // Băm mk
+    // B1: Tạo Salt 
+    const salt = await bcryptjs.genSalt(10); // Số 10 chính là Cost Factor (Số vòng lặp thuật toán).
+    // B2: Tạo Hash
+    this.hashedPassword = await bcryptjs.hash(this.hashedPassword, salt);
+});
+
+
+// Hàm so sánh mk thực hiện 4 chức năng 
+// 1. Lấy mật khẩu người dùng mới nhập
+// 2. Lấy chuỗi Salt (muối) được lưu ẩn bên trong mật khẩu đã băm ở database
+// 3. Thực hiện băm mật khẩu mới nhập với cái Salt đó
+// 4. Nếu kết quả băm mới giống hệt kết quả băm cũ -> Trả về true. Nếu khác -> Trả về false.
+userSchema.methods.comparePassword = async function(candidatePassword) {
+    // andidatePassword là mật khẩu người dùng vừa gõ ở form đăng nhập
+    return await bcryptjs.compare(candidatePassword, this.hashedPassword);
+}
+
 
 const User = mongoose.model("User", userSchema);
 export default User;
