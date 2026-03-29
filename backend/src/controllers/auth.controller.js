@@ -89,3 +89,7 @@ export const signIn = async(req, res) => {
         return res.status(500).json({message: "Lỗi hệ thống"});
     }
 }
+
+export const getMe = (req, res) => {
+    return res.status(200).json({user: req.user});
+}
