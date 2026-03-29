@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
 // để truy cập vào dữ liệu của người dùng ngay trước khi nó "bay" vào Database.
 userSchema.pre('save', async function() {
     // Kiểm tra nếu không đổi mật khẩu thì thoát ra luôn
-    if(!this.isModified('hashedPassword')) return next();
+    if(!this.isModified('hashedPassword')) return;
     // Băm mk
     // B1: Tạo Salt 
     const salt = await bcryptjs.genSalt(10); // Số 10 chính là Cost Factor (Số vòng lặp thuật toán).
