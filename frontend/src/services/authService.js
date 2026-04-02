@@ -1,5 +1,5 @@
 import axiosInstance from "@/api/axios";
-// "đầu não" điều phối toàn bộ các yêu cầu liên quan đến xác thực.
+// "Đầu não" điều phối toàn bộ các yêu cầu liên quan đến xác thực.
 
 // ========================================================================
 // Nhận dữ liệu từ Form đăng ký và gửi lên Server
