@@ -1,6 +1,7 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/home/Hero";
+import PopularLocations from "@/components/home/PopularLocations";
 
 const HomePage = () => {
   return (
@@ -8,6 +9,8 @@ const HomePage = () => {
       <Navbar />
       
       <Hero/>
+
+      <PopularLocations/>
       
     </div>
   );
