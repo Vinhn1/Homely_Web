@@ -4,6 +4,7 @@ import Hero from "../components/home/Hero";
 import PopularLocations from "@/components/home/PopularLocations";
 import SpaceCategories from "@/components/home/SpaceCategories";
 import FeaturedListings from "@/components/home/FeaturedListings";
+import WhyChooseUs from "@/components/home/LandlordCTA";
 
 const HomePage = () => {
   return (
@@ -17,6 +18,8 @@ const HomePage = () => {
       <SpaceCategories/>
 
       <FeaturedListings/>
+
+      <WhyChooseUs/>
       
     </div>
   );
