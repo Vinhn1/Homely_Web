@@ -2,6 +2,8 @@ import React from "react";
 import Navbar from "../components/Navbar";
 import Hero from "../components/home/Hero";
 import PopularLocations from "@/components/home/PopularLocations";
+import SpaceCategories from "@/components/home/SpaceCategories";
+import FeaturedListings from "@/components/home/FeaturedListings";
 
 const HomePage = () => {
   return (
@@ -11,6 +13,10 @@ const HomePage = () => {
       <Hero/>
 
       <PopularLocations/>
+
+      <SpaceCategories/>
+
+      <FeaturedListings/>
       
     </div>
   );
