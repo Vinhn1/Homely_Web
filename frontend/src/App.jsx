@@ -6,6 +6,8 @@ import { Toaster } from 'sonner';
 import { useEffect } from 'react';
 import { useAuthStore } from './store/authStore';
 import { Loader } from "lucide-react";
+import ProtectedRoute from './components/ProtectedRoute';
+import RedirectAuthenticatedUser from './components/RedirectAuthenticatedUser';
 
 
 
@@ -32,9 +34,26 @@ function App() {
     <> 
       <Toaster position='top-right' richColors/>
       <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/signin" element={<SignInPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        {/* 1. Trang chủ: Cần bảo vệ nghiêm ngặt */}
+        <Route path="/" element={
+          <ProtectedRoute>
+            <HomePage />
+          </ProtectedRoute>
+          } />
+
+        {/* 2. Trang Đăng nhập: Nếu login rồi thì đừng cho vào nữa */}
+        <Route path="/signin" element={
+          <RedirectAuthenticatedUser>
+            <SignInPage />
+          </RedirectAuthenticatedUser>
+          } />
+
+        {/* 3. Trang Đăng ký: Tương tự như Đăng nhập */}
+        <Route path="/signup" element={
+          <RedirectAuthenticatedUser>
+             <SignUpPage />
+          </RedirectAuthenticatedUser>
+          } />
       </Routes>
     </>
    
