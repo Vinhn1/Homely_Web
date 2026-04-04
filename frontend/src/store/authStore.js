@@ -1,7 +1,6 @@
 // Trung tâm điều khiển xác thực (Authencation Hub)
 import {create} from "zustand";
 import * as authService from "../services/authService";
-import { error } from "node:console";
 
 export const useAuthStore = create((set) => ({
   // Thiết lập các biến trạng thái (Initial State)
@@ -19,7 +18,7 @@ export const useAuthStore = create((set) => ({
       const response = await authService.signUp(userData);
 
       set({
-        user: response.data.user,
+        user: response.user,
         isAuthenticated: true,
         isLoading: false
       });
@@ -44,12 +43,12 @@ export const useAuthStore = create((set) => ({
       const response = await authService.signIn(credentials);
 
       // Lưu Token vào localStorage để duy trì phiên làm việc 
-      if(response.data.accessToken){
-        localStorage.setItem("accessToken", response.data.accessToken);
+      if(response.accessToken){
+        localStorage.setItem("accessToken", response.accessToken);
       }
 
       set({
-        user: response.data.user,
+        user: response.user,
         isAuthenticated: true,
         isLoading: false
       });

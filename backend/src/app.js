@@ -11,7 +11,10 @@ app.use((req, res, next) => {
 app.use(express.json());
 // Đảm bảo server có thể đọc được dữ liệu từ các loại form HTML truyền thống 
 app.use(express.urlencoded({extended: true}));
-app.use(cors());
+app.use(cors({
+    origin: "http://localhost:5173", // Địa chỉ chính xác frontend 
+    credentials: true // Cho phép gửi kèm thông tin xác thực (Cookie/Headers)
+}));
 
 
 

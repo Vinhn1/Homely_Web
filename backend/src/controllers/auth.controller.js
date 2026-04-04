@@ -63,7 +63,6 @@ export const signIn = async(req, res) => {
 
         const result = signInSchema.safeParse(req.body);
         
-
         if(!result.success){
             return res.status(400).json({message: "Dữ liệu không hợp lệ", errors: result.error.flatten().fieldErrors});
         }
@@ -71,7 +70,12 @@ export const signIn = async(req, res) => {
         const {username, password} = result.data;
         
         // Kiểm tra sự tồn tại của người dùng
-        const user = await User.findOne({username});
+        const user = await User.findOne({
+            $or: [
+                {username: username},
+                {email: username}
+            ]
+        });
         if(!user){
             return res.status(404).json({message: "Tài khoản hoặc mật khẩu không chính xác."})
         }
@@ -95,7 +99,16 @@ export const signIn = async(req, res) => {
         });
 
         // Trả access token về trong res 
-        return res.status(200).json({message: `User ${user.displayName} đã logged in!`, accessToken});
+        return res.status(200).json({message: `Chào mừng ${user.displayName} đã quay trở lại`, 
+        accessToken, 
+        user: {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            displayName: user.displayName,
+            role: user.role,
+            avatarUrl: user.avatarUrl
+    }});
 
     }catch(error){
         console.error("Có lỗi xảy ra khi gọi signIn: ", error);

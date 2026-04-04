@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom"; // Cần thiết cho các thẻ <Link>
+import { Link, useNavigate } from "react-router-dom"; // Cần thiết cho các thẻ <Link>
 import { 
   Mail, 
   Lock, 
@@ -13,15 +13,34 @@ import {
 // Import các Component UI từ Shadcn
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuthStore } from "@/store/authStore";
+import { toast } from "sonner";
+
+
 
 const SignInPage = () => {
+  const navigate = useNavigate();
+  // Lấy hàm signin và biến isloading từ Zustand 
+  const {signIn, isLoading} = useAuthStore();
   // 1. Thêm 'errors' và 'isLoading' để không bị báo lỗi "not defined"
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const isLoading = false; // Tạm thời để false để nút bấm hoạt động
 
   // 2. Định nghĩa hàm onSubmit
-  const onSubmit = (data) => {
-    console.log("Dữ liệu đăng nhập:", data);
+  const onSubmit = async (data) => {
+    //   console.log("Dữ liệu đăng nhập:", data);
+    try{
+      await signIn({
+        username: data.email,
+        password: data.password
+      });
+    
+      toast.success("Đăng nhập thành công! Chào mừng bạn quay lại.");
+      navigate("/");
+
+    }catch(error){
+      
+      toast.error(error.response?.data?.message || "Email hoặc mật khẩu không đúng!");
+    }
   };
 
   return (
@@ -88,8 +107,9 @@ const SignInPage = () => {
                 <Link to="#" className="text-primary font-semibold text-sm hover:underline">Quên mật khẩu?</Link>
               </div>
             </div>
-            <Button type="submit" className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl text-lg font-bold shadow-lg flex items-center justify-center gap-2 group">
-              Đăng nhập <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            <Button type="submit" disabled={isLoading} className="w-full h-12 bg-primary hover:bg-primary/90 text-primary-foreground rounded-2xl text-lg font-bold shadow-lg flex items-center justify-center gap-2 group">
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
+              {!isLoading &&  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />}
             </Button>
           </form>
 
