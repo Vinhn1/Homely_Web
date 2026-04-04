@@ -13,7 +13,7 @@ export const signUp = async (req, res) => {
         }
 
         // Lấy dữ liệu sạch 
-        const {username, password, email, firstName, lastName} = result.data;
+        const {username, password, email, displayName, role} = result.data;
         
 
 
@@ -29,7 +29,8 @@ export const signUp = async (req, res) => {
             username,
             email,
             hashedPassword: password,
-            displayName: firstName + " " + lastName
+            displayName,
+            role
         })
         // return 
         return res.status(201).json({message: "Đăng ký thành công!", user: {
@@ -39,6 +40,18 @@ export const signUp = async (req, res) => {
 
     }catch(error){
         console.error(">>> Lỗi chi tiết: ", error);
+        // Kiểm tra nếu là lỗi trùng lặp dữ liệu (Mã 11000)
+        if(error.code === 11000){
+            // Kiểm tra có phải trùng email hay không 
+            if(error.keyValue && error.keyValue.email){
+                return res.status(400).json({message: "Email này đã tồn tại, vui lòng nhập email khác!"});
+            }
+
+            // Trùng Username 
+            if(error.keyValue && error.keyValue.username){
+                return res.status(400).json({message: "Username đã tồn tại!"});
+            }
+        }
         return res.status(500).json({message: "Lỗi hệ thống!"})
     }
     
