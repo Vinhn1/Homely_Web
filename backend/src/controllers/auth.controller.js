@@ -18,10 +18,20 @@ export const signUp = async (req, res) => {
 
 
         // Kiểm tra username tồn tại chưa 
-        const duplicate = await User.findOne({username});
-        if(duplicate){
-            // 409: báo hiệu rằng yêu cầu của người dùng đang bị xung đột với dữ liệu hiện có trên Server
-            return res.status(409).json({message: "Username đã tồn tại!"})
+       const duplicate = await User.findOne({
+            $or: [
+                { username: username },
+                { email: email }
+            ]
+        });
+
+        if (duplicate) {
+    // Nếu trùng email
+         if (duplicate.email === email) {
+                return res.status(409).json({ message: "Email này đã được sử dụng!" });
+            }
+            // Nếu trùng username
+            return res.status(409).json({ message: "Username này đã tồn tại!" });
         }
 
         // Tạo user mới
@@ -108,7 +118,7 @@ export const signIn = async(req, res) => {
             displayName: user.displayName,
             role: user.role,
             avatarUrl: user.avatarUrl
-    }});
+        }});
 
     }catch(error){
         console.error("Có lỗi xảy ra khi gọi signIn: ", error);

@@ -13,49 +13,51 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import axios from "axios";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/authStore";
 
 
 const SignUpPage = () => {
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm();
   const [role, setRole] = useState("tenant"); // tenant hoặc host
-  const [isLoading, setIsLoading] = useState(false);
+  const {signUp, isLoading} = useAuthStore();
  
 
   const onSubmit = async (data) => {
-    // console.log("Dữ liệu đăng ký:", { ...data, role });
-    setIsLoading(true);
+  
     // Ánh xạ vai trò từ frontend sang backend
     const mappedRole = role === "host" ? "owner" : "user";
 
     try{
       // Gọi API bằng axios.post(d/c api, dữ liệu gửi đi)
-      const response = await axios.post("http://localhost:5000/api/auth/signUp", {
-        username: data.email, // Lấy email làm username
-        email: data.email,
-        password: data.password,
-        displayName: data.name, // Map "name" của From sang "displayName" của backend
-        role: mappedRole // truyền vai trò được ánh xạ 
-      });
+      // const response = await axios.post("http://localhost:5000/api/auth/signUp", {
+      //   username: data.email, // Lấy email làm username
+      //   email: data.email,
+      //   password: data.password,
+      //   displayName: data.name, // Map "name" của From sang "displayName" của backend
+      //   role: mappedRole // truyền vai trò được ánh xạ 
+      // });
+      
+      await signUp({
+         username: data.email,
+         email: data.email,
+         password: data.password,
+         displayName: data.name,
+         role: mappedRole
+      })
 
       // Xử lý khi thành công 
-      console.log("Đăng ký thành công: ", response.data);
       toast.success("Đăng ký thành công!");
 
       // Điều hướng về trang đăng nhập 
-      setTimeout(() => {
-        navigate("/signin");
-      }, 2000); // Chờ 2s để người dùng đọc thông báo 
+      navigate("/signin");
 
     }catch(error){
       // Xử lý khi có lỗi 
-      console.error("Lỗi đăng ký: ", error.response?.data?.message || error.message);
+     //  console.error("Lỗi đăng ký: ", error.response?.data?.message || error.message);
 
       toast.error(error.response?.data?.message || "Có lỗi xảy ra, vui lòng thử lại!");
-    }finally{
-      setIsLoading(false);
     }
   };
 
