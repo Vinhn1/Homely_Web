@@ -5,7 +5,7 @@ import * as authService from "../services/authService";
 export const useAuthStore = create((set) => ({
   // Thiết lập các biến trạng thái (Initial State)
   user: null,
-  isAuthenticated: true, // Trạng thái đã login hay chưa
+  isAuthenticated: false,
   error: null, // Nơi chứa thông báo lỗi nếu có 
   isLoading: false, // Đợi Server phản hồi (true/false)
   isCheckingAuth: true, // Kiểm tra token cũ 
@@ -72,10 +72,12 @@ export const useAuthStore = create((set) => ({
     });
 
     try{
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       const response = await authService.getMe();
 
       set({
-        user: response.data.user,
+        user: response.user,
         isAuthenticated: true,
         isCheckingAuth: false
       });
