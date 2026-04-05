@@ -8,6 +8,9 @@ import { useAuthStore } from './store/authStore';
 import { Loader } from "lucide-react";
 import ProtectedRoute from './components/ProtectedRoute';
 import RedirectAuthenticatedUser from './components/RedirectAuthenticatedUser';
+import ProfilePage from "./pages/dashboard/shared/ProfilePage";
+import DashboardLayout from './layouts/DashboardLayout';
+
 
 
 
@@ -35,11 +38,7 @@ function App() {
       <Toaster position='top-right' richColors/>
       <Routes>
         {/* 1. Trang chủ: Cần bảo vệ nghiêm ngặt */}
-        <Route path="/" element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
-          } />
+        <Route path="/" element={<HomePage />} />
 
         {/* 2. Trang Đăng nhập: Nếu login rồi thì đừng cho vào nữa */}
         <Route path="/signin" element={
@@ -53,7 +52,12 @@ function App() {
           <RedirectAuthenticatedUser>
              <SignUpPage />
           </RedirectAuthenticatedUser>
-          } />
+        } />
+
+        <Route path="/dashboard" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
+        {/* Các trang con sẽ nằm ở đây */}
+        <Route path="profile" element={<ProfilePage />} /> 
+       </Route>
       </Routes>
     </>
    

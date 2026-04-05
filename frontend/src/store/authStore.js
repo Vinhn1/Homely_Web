@@ -72,8 +72,6 @@ export const useAuthStore = create((set) => ({
     });
 
     try{
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
       const response = await authService.getMe();
 
       set({

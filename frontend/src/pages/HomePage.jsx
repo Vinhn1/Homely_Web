@@ -8,6 +8,7 @@ import WhyChooseUs from "@/components/home/LandlordCTA";
 import Footer from "../components/Footer";
 
 const HomePage = () => {
+
   return (
     <div className="min-h-[200vh] bg-[#f8fafc]">
       <Navbar />
