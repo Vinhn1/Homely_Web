@@ -24,3 +24,12 @@ export const getMe = async () => {
     const response = await axiosInstance.get('/auth/me');
     return response.data;
 }
+
+
+// Hàm cập nhật thông tin cá nhân
+export const updateProfile = async (formData) => {
+    // Gửi yêu cầu PUT tới /user/profile kèm theo dữ liệu formData 
+    // Backend sẽ dùng multer để bóc tách file và data từ đây 
+    const response = await axiosInstance.put('/user/profile', formData);
+    return response.data;
+}

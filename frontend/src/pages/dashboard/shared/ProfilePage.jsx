@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useAuthStore } from "../../../store/authStore";
 import { 
   Camera, MapPin, Mail, Phone, User, 
@@ -6,19 +6,73 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "@/components/dashbroad/Sidebar";
+import { toast } from "sonner";
 
 const ProfilePage = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateProfile } = useAuthStore();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const activeTab = searchParams.get("tab") || "personal";
+
+  const fileInputRef = useRef(null);
   
+  // Khởi tạo state cho form
   const [formData, setFormData] = useState({
-    name: user?.name || "Người thuê (Demo)",
-    email: user?.email || "renter@homely.vn",
-    phone: "0901234567",
-    location: "TP. Hồ Chí Minh, Việt Nam"
+    displayName: user?.displayName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    location: user?.bio || ""
   });
+
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(user?.avatarUrl || "");
+
+  // ĐỒNG BỘ DỮ LIỆU: Cập nhật form khi user từ store thay đổi (ví dụ sau khi reload trang)
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        displayName: user.displayName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        location: user.bio || ""
+      });
+      setImagePreview(user.avatarUrl || "");
+    }
+  }, [user]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if(file){
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+
+    // Gửi đúng trường 'displayName' thay vì 'name' để khớp Backend
+    data.append("displayName", formData.displayName);
+    data.append("phone", formData.phone);
+    data.append("bio", formData.location);
+
+    if(selectedImage){
+      data.append("avatar", selectedImage);
+    }
+
+    try{
+      await updateProfile(data);
+      toast.success("Cập nhật thành công!");
+    }catch(error){
+      console.error(error);
+      toast.error("Có lỗi xảy ra khi cập nhật!");
+    }
+  }
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,30 +87,36 @@ const ProfilePage = () => {
     <div className="space-y-10">
       {/* 1. PROFILE HERO SECTION */}
       <section className="bg-white/40 backdrop-blur-md rounded-[48px] p-6 lg:p-8 border border-white/40 shadow-sm relative overflow-hidden">
-        {/* Subtle Background Glow */}
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-100/30 rounded-full blur-3xl"></div>
         
         <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-          {/* Large Avatar Card */}
           <div className="relative group">
             <div className="w-36 h-36 rounded-[3rem] overflow-hidden shadow-xl border-4 border-white group-hover:scale-105 transition-transform duration-700">
               <img 
                 alt="Profile" 
                 className="w-full h-full object-cover" 
-                src={`https://ui-avatars.com/api/?name=${user?.name || "User"}&background=random`} 
+                src={imagePreview || `https://ui-avatars.com/api/?name=${user?.displayName || "User"}&background=random`} 
               />
             </div>
-            <button className="absolute -bottom-1 -right-1 p-3.5 bg-blue-600 text-white rounded-[1.5rem] shadow-xl hover:bg-blue-700 transition-all hover:scale-110 active:scale-95 border-4 border-white">
+
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              onChange={handleImageChange} 
+              className="hidden" 
+              accept="image/*" 
+            />
+
+            <button onClick={() => {fileInputRef.current.click()}} className="absolute -bottom-1 -right-1 p-3.5 bg-blue-600 text-white rounded-[1.5rem] shadow-xl hover:bg-blue-700 transition-all hover:scale-110 active:scale-95 border-4 border-white">
               <Camera className="w-5 h-5" />
             </button>
           </div>
 
-          {/* User Info & Badges */}
           <div className="text-center md:text-left space-y-4 flex-1">
             <div className="space-y-1">
               <div className="flex items-center justify-center md:justify-start gap-4">
                 <h1 className="text-3xl font-black text-slate-900 tracking-tighter italic">
-                  {user?.name || "Người dùng"}
+                  {user?.displayName || "Người dùng"}
                 </h1>
                 <div className="bg-blue-600 p-1 rounded-full shadow-lg shadow-blue-200">
                   <CheckCircle2 className="w-4 h-4 text-white fill-current" />
@@ -75,7 +135,6 @@ const ProfilePage = () => {
             </div>
           </div>
 
-          {/* Quick Actions */}
           <div className="flex flex-col gap-3 min-w-[200px]">
             <button className="w-full py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-full font-black text-xs hover:bg-blue-50 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1 active:scale-95">
               Trở thành Chủ trọ
@@ -95,14 +154,11 @@ const ProfilePage = () => {
         </div>
       </section>
 
-      {/* 2. SPLIT CONTENT SECTION */}
       <div className="flex flex-col lg:flex-row gap-8 items-start">
-        {/* Sidebar Left */}
         <div className="w-full lg:w-72 sticky top-32">
           <Sidebar />
         </div>
 
-        {/* Main Form Content Right */}
         <div className="flex-1 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
           {activeTab === "personal" ? (
             <div className="bg-white rounded-[48px] p-8 lg:p-10 shadow-[0_32px_120px_-20px_rgba(0,0,0,0.06)] border border-slate-50 relative overflow-hidden">
@@ -118,8 +174,8 @@ const ProfilePage = () => {
                   <div className="space-y-3">
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Họ và tên</label>
                     <input 
-                      name="name"
-                      value={formData.name}
+                      name="displayName"
+                      value={formData.displayName}
                       onChange={handleChange}
                       placeholder="Nhập họ và tên..."
                       className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
@@ -160,7 +216,7 @@ const ProfilePage = () => {
                 </div>
 
                 <div className="pt-6">
-                  <button className="px-12 py-5 bg-blue-600 text-white rounded-full font-black text-base shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all transform hover:-translate-y-1.5 active:scale-95 tracking-wide">
+                  <button onClick={handleSubmit} className="px-12 py-5 bg-blue-600 text-white rounded-full font-black text-base shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all transform hover:-translate-y-1.5 active:scale-95 tracking-wide">
                     Lưu thay đổi hồ sơ
                   </button>
                 </div>

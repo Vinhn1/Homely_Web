@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
 // Cổng bảo vệ xác thực đúng mới cho vào routes 
-export const verifyToken = async (req, res, next) => {
+export const protect = async (req, res, next) => {
  try {
     // Lấy token từ header
     const authHeader = req.headers["authorization"];

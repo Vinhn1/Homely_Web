@@ -100,4 +100,28 @@ export const useAuthStore = create((set) => ({
   },
   // Hàm phụ trợ: Xóa thông báo lỗi 
   clearError: () => set({ error: null}),
+  // Update Profile
+  updateProfile: async (formData) => {
+    set({
+      isLoading: true,
+      error: null
+    });
+
+    try{
+      
+      // Gọi Service 
+      const response = await authService.updateProfile(formData);
+      // Cập nhật biến user 
+      set({
+        user: response.user, // 'user' là key mà Backend trả về (ở user.controller.js)
+        isLoading: false
+      })
+    }catch(error){
+
+      set({
+        error: error.response?.data?.message || 'Lỗi cập nhật hồ sơ!',
+        isLoading: false
+      })
+    }
+  }
 }))

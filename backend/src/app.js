@@ -1,12 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './routes/auth.route.js';
+import userRoutes from './routes/user.route.js';
 
 const app = express();
-app.use((req, res, next) => {
-    console.log(`>>> LOG: Có request gửi tới: ${req.method} ${req.url}`);
-    next();
-})
+
 // Sử dụng Middleware (để đọc dữ liệu từ form)
 app.use(express.json());
 // Đảm bảo server có thể đọc được dữ liệu từ các loại form HTML truyền thống 
@@ -21,6 +19,7 @@ app.use(cors({
 //======================================================
 // Mọi Đ/C bắt đầu bằng /api/auth sẽ được chuyển hướng sang authRoutes
 app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
 
 
 

@@ -55,9 +55,17 @@ const Navbar = () => {
                   to="/dashboard/profile"
                   className="w-11 h-11 rounded-2xl bg-blue-600 border-2 border-white shadow-lg flex items-center justify-center overflow-hidden hover:scale-110 transition-all group"
                 >
-                  <div className="w-full h-full flex items-center justify-center text-white font-black text-sm group-hover:scale-110 transition-transform">
-                    {user?.name?.charAt(0)}
-                  </div>
+                  {user?.avatarUrl ? (
+                    <img 
+                      src={user.avatarUrl} 
+                      alt="Avatar" 
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform" 
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white font-black text-sm group-hover:scale-110 transition-transform">
+                      {user?.displayName?.charAt(0) || user?.username?.charAt(0) || "U"}
+                    </div>
+                  )}
                 </Link>
 
                 {/* Logout Button */}
