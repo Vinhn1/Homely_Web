@@ -3,10 +3,12 @@ import { usePropertyStore } from "../store/propertyStore";
 import PropertyCard from "../components/PropertyCard";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
+import PropertyMap from "../components/PropertyMap";
 import { SlidersHorizontal, Map as MapIcon, LayoutGrid, Loader } from "lucide-react";
 
 const SearchPage = () => {
   const { properties, fetchProperties, isLoading } = usePropertyStore();
+  const [activePropertyId, setActivePropertyId] = React.useState(null);
 
   // 1. Khởi động: Gọi dữ liệu ngay khi trang vừa load
   useEffect(() => {
@@ -72,22 +74,33 @@ const SearchPage = () => {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {properties.map((item) => (
-                  <PropertyCard key={item._id} property={item} />
+                  <div 
+                    key={item._id} 
+                    id={`property-${item._id}`}
+                    onMouseEnter={() => setActivePropertyId(item._id)}
+                    onMouseLeave={() => setActivePropertyId(null)}
+                  >
+                    <PropertyCard 
+                      property={item} 
+                      isActive={activePropertyId === item._id} 
+                    />
+                  </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Cột phải: Bản đồ (40% - Tạm thời để trống) */}
+          {/* Cột phải: Bản đồ thực tế (Leaflet Map Integration) */}
           <div className="hidden lg:block w-[40%]">
-             <div className="sticky top-28 h-[calc(100vh-140px)] bg-slate-200 rounded-3xl overflow-hidden border-4 border-white shadow-2xl flex items-center justify-center">
-                <div className="text-center p-8">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                         <MapIcon className="text-blue-600" size={32} />
-                    </div>
-                    <h3 className="font-bold text-slate-800 mb-2">Bản đồ đang được chuẩn bị</h3>
-                    <p className="text-slate-500 text-sm">Chúng ta sẽ tích hợp Leaflet Map ở bước tiếp theo để hiển thị {properties.length} vị trí phòng.</p>
-                </div>
+             <div className="sticky top-28 h-[calc(100vh-140px)] z-0 shadow-2xl">
+                <PropertyMap 
+                  properties={properties} 
+                  onMarkerClick={(id) => {
+                    setActivePropertyId(id);
+                    document.getElementById(`property-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }}
+                  activeId={activePropertyId}
+                />
              </div>
           </div>
 

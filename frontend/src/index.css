@@ -1,5 +1,6 @@
 @import "tw-animate-css";
 @import "@fontsource-variable/geist";
+@import "leaflet/dist/leaflet.css";
 
 @tailwind base;
 @tailwind components;

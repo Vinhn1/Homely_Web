@@ -1,9 +1,11 @@
 import { MapPin, Maximize, Star, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property, isActive }) => {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow border border-slate-100 group">
+    <div className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border group relative ${
+      isActive ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-100'
+    }`}>
       {/* 1. Phần Ảnh & Badge */}
       <div className="relative h-48 overflow-hidden">
         <img 
