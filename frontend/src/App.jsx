@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import RedirectAuthenticatedUser from './components/RedirectAuthenticatedUser';
 import ProfilePage from "./pages/dashboard/shared/ProfilePage";
 import DashboardLayout from './layouts/DashboardLayout';
+import SearchPage from './pages/SearchPage';
 
 
 
@@ -39,6 +40,7 @@ function App() {
       <Routes>
         {/* 1. Trang chủ: Cần bảo vệ nghiêm ngặt */}
         <Route path="/" element={<HomePage />} />
+        <Route path="/search" element={<SearchPage />} />
 
         {/* 2. Trang Đăng nhập: Nếu login rồi thì đừng cho vào nữa */}
         <Route path="/signin" element={
