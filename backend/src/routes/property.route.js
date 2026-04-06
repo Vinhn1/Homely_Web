@@ -7,6 +7,6 @@ const router = express.Router();
 router.get("/", getProperties);
 
 // Router lấy chi tiết (Dùng ID để xác định căn hộ)
-router.get(":/id", getPropertyById);
+router.get("/:id", getPropertyById);
 
 export default router;
