@@ -37,6 +37,41 @@ export const usePropertyStore = create((set) => ({
         }catch(error){
             set({error: "Không tìm thấy thông tin căn hộ", isLoading: false});
         }
+    },
+
+    // Hàm gửi đánh giá mới
+    addReview: async (propertyId, reviewData) => {
+        set({ isLoading: true });
+        try {
+            const response = await axios.post(`/properties/${propertyId}/reviews`, reviewData);
+            
+            // Cập nhật lại selectedProperty với review mới và rating mới
+            set((state) => {
+                if (state.selectedProperty && state.selectedProperty._id === propertyId) {
+                    const newReviews = [response.data.data, ...(state.selectedProperty.reviews || [])];
+                    return {
+                        selectedProperty: {
+                            ...state.selectedProperty,
+                            reviews: newReviews,
+                            // Backend đã trả về rating mới trong DB, nhưng ta có thể tạm thời cập nhật ở đây hoặc refetch
+                        },
+                        isLoading: false
+                    };
+                }
+                return { isLoading: false };
+            });
+
+            // Gọi lại fetch để đồng bộ chính xác rating/count từ server
+            await usePropertyStore.getState().fetchPropertyById(propertyId);
+            
+            return { success: true, message: response.data.message };
+        } catch (error) {
+            set({ isLoading: false });
+            return { 
+                success: false, 
+                message: error.response?.data?.message || "Lỗi gửi đánh giá" 
+            };
+        }
     }
 
 }))

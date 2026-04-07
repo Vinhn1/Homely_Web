@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "@/components/dashbroad/Sidebar";
+import BookingHistoryTab from "../tabs/BookingHistoryTab";
 import { toast } from "sonner";
 
 const ProfilePage = () => {
@@ -81,6 +82,87 @@ const ProfilePage = () => {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "personal":
+        return (
+          <div className="bg-white rounded-[48px] p-8 lg:p-10 shadow-[0_32px_120px_-20px_rgba(0,0,0,0.06)] border border-slate-50 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+            
+            <div className="relative z-10 space-y-10">
+              <div className="space-y-2">
+                <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Thông tin cá nhân</h2>
+                <p className="text-slate-400 font-bold text-base">Cập nhật thông tin để mọi người dễ dàng kết nối với bạn</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Họ và tên</label>
+                  <input 
+                    name="displayName"
+                    value={formData.displayName}
+                    onChange={handleChange}
+                    placeholder="Nhập họ và tên..."
+                    className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Địa chỉ Email</label>
+                  <input 
+                    name="email"
+                    value={formData.email}
+                    readOnly
+                    className="w-full px-6 py-4 bg-slate-200/30 border-2 border-transparent rounded-[20px] cursor-not-allowed text-slate-400 font-bold text-base shadow-inner"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Số điện thoại</label>
+                  <input 
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="Nhập số điện thoại..."
+                    className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
+                  />
+                </div>
+
+                <div className="space-y-3">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Vị trí</label>
+                  <input 
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Nhập vị trí..."
+                    className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button onClick={handleSubmit} className="px-12 py-5 bg-blue-600 text-white rounded-full font-black text-base shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all transform hover:-translate-y-1.5 active:scale-95 tracking-wide">
+                  Lưu thay đổi hồ sơ
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      case "history":
+        return <BookingHistoryTab />;
+      default:
+        return (
+          <div className="bg-white rounded-[4rem] p-24 flex flex-col items-center justify-center text-center shadow-sm">
+              <div className="w-32 h-32 bg-blue-50 rounded-[40px] flex items-center justify-center text-blue-600 mb-10 shadow-inner">
+                <Settings size={56} className="animate-spin-slow" />
+              </div>
+              <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Đang hoàn thiện tính năng</h3>
+              <p className="text-slate-400 font-bold text-lg max-w-sm text-center">Phần này đang được tối ưu hóa giao diện. Vui lòng quay lại sau!</p>
+          </div>
+        );
+    }
   };
 
   return (
@@ -160,77 +242,7 @@ const ProfilePage = () => {
         </div>
 
         <div className="flex-1 w-full animate-in fade-in slide-in-from-bottom-8 duration-700">
-          {activeTab === "personal" ? (
-            <div className="bg-white rounded-[48px] p-8 lg:p-10 shadow-[0_32px_120px_-20px_rgba(0,0,0,0.06)] border border-slate-50 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50/50 rounded-full -mr-32 -mt-32 blur-3xl"></div>
-              
-              <div className="relative z-10 space-y-10">
-                <div className="space-y-2">
-                  <h2 className="text-3xl font-black text-slate-900 tracking-tighter">Thông tin cá nhân</h2>
-                  <p className="text-slate-400 font-bold text-base">Cập nhật thông tin để mọi người dễ dàng kết nối với bạn</p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-10">
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Họ và tên</label>
-                    <input 
-                      name="displayName"
-                      value={formData.displayName}
-                      onChange={handleChange}
-                      placeholder="Nhập họ và tên..."
-                      className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Địa chỉ Email</label>
-                    <input 
-                      name="email"
-                      value={formData.email}
-                      readOnly
-                      className="w-full px-6 py-4 bg-slate-200/30 border-2 border-transparent rounded-[20px] cursor-not-allowed text-slate-400 font-bold text-base shadow-inner"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Số điện thoại</label>
-                    <input 
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      placeholder="Nhập số điện thoại..."
-                      className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
-                    />
-                  </div>
-
-                  <div className="space-y-3">
-                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Vị trí</label>
-                    <input 
-                      name="location"
-                      value={formData.location}
-                      onChange={handleChange}
-                      placeholder="Nhập vị trí..."
-                      className="w-full px-6 py-4 bg-slate-50/50 border-2 border-transparent rounded-[20px] focus:bg-white focus:border-blue-100 focus:ring-[8px] focus:ring-blue-50/30 transition-all outline-none font-bold text-slate-800 text-base placeholder:text-slate-300 shadow-inner"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-6">
-                  <button onClick={handleSubmit} className="px-12 py-5 bg-blue-600 text-white rounded-full font-black text-base shadow-2xl shadow-blue-200 hover:bg-blue-700 hover:shadow-blue-300 transition-all transform hover:-translate-y-1.5 active:scale-95 tracking-wide">
-                    Lưu thay đổi hồ sơ
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-[4rem] p-24 flex flex-col items-center justify-center text-center shadow-sm">
-                <div className="w-32 h-32 bg-blue-50 rounded-[40px] flex items-center justify-center text-blue-600 mb-10 shadow-inner">
-                  <Settings size={56} className="animate-spin-slow" />
-                </div>
-                <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tighter italic">Đang hoàn thiện tính năng</h3>
-                <p className="text-slate-400 font-bold text-lg max-w-sm text-center">Phần này đang được tối ưu hóa giao diện. Vui lòng quay lại sau!</p>
-            </div>
-          )}
+          {renderTabContent()}
         </div>
       </div>
 

@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/store/authStore"
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import { 
-  User, Heart, History, Star, LifeBuoy, Bell, ShieldCheck, ChevronRight
+  User, Heart, Calendar, Star, LifeBuoy, Bell, ShieldCheck, ChevronRight
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -13,7 +13,7 @@ const Sidebar = () => {
     const menuItems = [
         { id: "personal", label: "Thông tin cá nhân", icon: User, path: "/dashboard/profile?tab=personal" },
         { id: "saved", label: "Nhà đã lưu", icon: Heart, path: "/dashboard/profile?tab=saved" },
-        { id: "history", label: "Lịch sử thuê", icon: History, path: "/dashboard/profile?tab=history" },
+        { id: "history", label: "Đã đặt", icon: Calendar, path: "/dashboard/profile?tab=history" },
         { id: "reviews", label: "Đánh giá của tôi", icon: Star, path: "/dashboard/profile?tab=reviews" },
         { id: "support", label: "Yêu cầu hỗ trợ", icon: LifeBuoy, path: "/dashboard/profile?tab=support" },
         { id: "security", label: "Bảo mật & 2FA", icon: ShieldCheck, path: "/dashboard/profile?tab=security" },

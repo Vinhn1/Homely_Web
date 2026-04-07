@@ -33,7 +33,9 @@ const Navbar = () => {
               { to: "/search", icon: Search, label: "Khám phá" },
               { to: "/areas", icon: MapPin, label: "Khu vực" },
               { to: "/blog", icon: Globe, label: "Blog" },
-              ...(isAuthenticated ? [{ to: "/favorites", icon: Heart, label: "Yêu thích" }] : [])
+              ...(isAuthenticated ? [
+                { to: "/favorites", icon: Heart, label: "Yêu thích" }
+              ] : [])
             ].map((item) => (
               <Link 
                 key={item.to}
