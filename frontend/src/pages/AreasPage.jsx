@@ -19,7 +19,7 @@ const areasData = [
     rooms: "790",
     featured: true,
     tag: "Hot Area",
-    image: "https://images.unsplash.com/photo-1583417319070-4a69db38a482?auto=format&fit=crop&q=80&w=1200",
+    image: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=1200",
   },
   {
     id: "hcm-q7",
@@ -30,7 +30,7 @@ const areasData = [
     rooms: "380",
     featured: true,
     tag: "Premium",
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&q=80&w=1200",
+    image: "https://images.unsplash.com/photo-1449156001437-3a166aefbb05?q=80&w=1200",
   },
   {
     id: "hcm-bt",
@@ -41,7 +41,7 @@ const areasData = [
     rooms: "730",
     featured: true,
     tag: "High Demand",
-    image: "https://images.unsplash.com/photo-1623075253334-03264627ef7d?auto=format&fit=crop&q=80&w=1200",
+    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?q=80&w=1200",
   },
   {
     id: "hcm-td",
@@ -50,7 +50,8 @@ const areasData = [
     description: "Thành phố trong thành phố - trung tâm giáo dục và công nghệ mới.",
     apartments: "480",
     rooms: "1,100",
-    image: "https://images.unsplash.com/photo-1596422846543-75c6fc1850ec?auto=format&fit=crop&q=80&w=800",
+    tag: "Smart City",
+    image: "https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?q=80&w=800",
   },
   {
     id: "hcm-gv",
@@ -59,7 +60,8 @@ const areasData = [
     description: "Địa điểm lý tưởng cho các gia đình trẻ với chi phí sinh hoạt hợp lý.",
     apartments: "250",
     rooms: "490",
-    image: "https://images.unsplash.com/photo-1590674154474-0f3df9648934?auto=format&fit=crop&q=80&w=800",
+    tag: "Family Friendly",
+    image: "https://images.unsplash.com/photo-1449844908441-8829872d2607?q=80&w=800",
   },
   {
     id: "hcm-q2",
@@ -68,7 +70,8 @@ const areasData = [
     description: "Khu vực ven sông thơ mộng, tập trung cộng đồng cư dân quốc tế.",
     apartments: "610",
     rooms: "270",
-    image: "https://images.unsplash.com/photo-1518005020251-582c7884474a?auto=format&fit=crop&q=80&w=800",
+    tag: "Riverside",
+    image: "https://images.unsplash.com/photo-1444723121155-d5962bd796f4?q=80&w=800",
   },
   {
     id: "hcm-q3",
@@ -77,7 +80,8 @@ const areasData = [
     description: "Yên tĩnh với những con đường rợp bóng cây và biệt thự cổ điển.",
     apartments: "180",
     rooms: "340",
-    image: "https://images.unsplash.com/photo-1563245339-dfc20aac6507?auto=format&fit=crop&q=80&w=800",
+    tag: "Historical",
+    image: "https://images.unsplash.com/photo-1518005020251-582c7884474a?q=80&w=800",
   },
   {
     id: "hcm-q10",
@@ -86,7 +90,38 @@ const areasData = [
     description: "Thiên đường mua sắm và ẩm thực, nhộn nhịp suốt ngày đêm.",
     apartments: "240",
     rooms: "430",
-    image: "https://images.unsplash.com/photo-1570160234645-832c3556f33d?auto=format&fit=crop&q=80&w=800",
+    tag: "Dynamic",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=800",
+  },
+  {
+    id: "vl",
+    name: "Vĩnh Long",
+    listings: "450",
+    description: "Miền sông nước hữu tình, không gian sống thanh bình và mát mẻ.",
+    apartments: "120",
+    rooms: "330",
+    tag: "Mekong Delta",
+    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=800",
+  },
+  {
+    id: "dl",
+    name: "Đà Lạt",
+    listings: "820",
+    description: "Thành phố ngàn hoa với không khí trong lành, lý tưởng để nghỉ dưỡng.",
+    apartments: "210",
+    rooms: "610",
+    tag: "Foggy City",
+    image: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?q=80&w=800",
+  },
+  {
+    id: "dn",
+    name: "Đà Nẵng",
+    listings: "1,100",
+    description: "Thành phố đáng sống nhất Việt Nam với những bãi biển đẹp hút hồn.",
+    apartments: "560",
+    rooms: "540",
+    tag: "Coast City",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800",
   }
 ];
 
@@ -273,9 +308,21 @@ const AreasPage = () => {
                 onClick={() => handleAreaClick(area.name)}
                 className="group bg-white rounded-[3rem] p-3 shadow-md border border-slate-50 hover:shadow-2xl hover:shadow-blue-100 transition-all duration-500 cursor-pointer"
               >
-                <div className="relative h-44 rounded-[2.2rem] overflow-hidden mb-6">
-                  <img src={area.image} alt={area.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                <div className="relative h-44 rounded-[2.2rem] overflow-hidden mb-6 bg-gradient-to-br from-slate-200 to-slate-100 italic">
+                  <img 
+                    src={area.image} 
+                    alt={area.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                    onError={(e) => {
+                      e.target.style.display = 'none';
+                    }}
+                  />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+                  <div className="absolute top-4 left-4">
+                    <span className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-white text-[8px] font-black uppercase tracking-widest border border-white/10 italic">
+                      {area.tag}
+                    </span>
+                  </div>
                   <div className="absolute top-4 right-4 p-2 bg-white/20 backdrop-blur-md rounded-xl text-white opacity-0 group-hover:opacity-100 transition-all">
                     <ArrowRight size={18} />
                   </div>
