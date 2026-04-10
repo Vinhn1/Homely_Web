@@ -1,14 +1,16 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useAuthStore } from "../store/authStore";
 
 // children ở đây là những gì nằm bên trong <ProtectedRoute>...</ProtectedRoute>
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
+  const location = useLocation();
 
   // 1. Kiểm tra trạng thái từ bộ não trung tâm (authStore)
   // Nếu chưa đăng nhập (false), dùng <Navigate> để điều hướng về trang signin
+  // Đồng thời lưu lại trang hiện tại (location) vào state để quay lại sau
   if (!isAuthenticated) {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/signin" state={{ from: location }} replace />;
   }
 
   // 2. Nếu đã đăng nhập (true), cho phép xem nội dung bên trong

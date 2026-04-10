@@ -1,16 +1,21 @@
 import express from 'express';
-import { getProperties, getPropertyById, addReview } from '../controllers/property.controller.js';
+import { getProperties, getPropertyById, addReview, createProperty, updateProperty, deleteProperty, getMyListings, toggleListingStatus } from '../controllers/property.controller.js';
 import { protect } from '../middlewares/auth.middleware.js';
+import { requireOwner } from '../middlewares/role.middleware.js';
+import { uploadImages } from '../middlewares/upload.middleware.js';
 
 const router = express.Router();
 
-// Router lấy danh sách (kết nối với hàm tìm kiếm/lọc)
+// ====== PUBLIC ROUTES ======
 router.get("/", getProperties);
-
-// Router lấy chi tiết (Dùng ID để xác định căn hộ)
+router.get("/my-listings", protect, requireOwner, getMyListings); // phải trên :id
 router.get("/:id", getPropertyById);
-
-// Thêm đánh giá (Yêu cầu đăng nhập)
 router.post("/:id/reviews", protect, addReview);
+
+// ====== OWNER ROUTES ======
+router.post("/", protect, requireOwner, uploadImages, createProperty);
+router.put("/:id", protect, requireOwner, uploadImages, updateProperty);
+router.delete("/:id", protect, requireOwner, deleteProperty);
+router.patch("/:id/status", protect, requireOwner, toggleListingStatus);
 
 export default router;

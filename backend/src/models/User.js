@@ -40,8 +40,24 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: String,
-        sparse: true, // Cho phép null, nhưng không được trùng
+        sparse: true,
     },
+    // Trạng thái yêu cầu trở thành chủ nhà (null = chưa yêu cầu)
+    ownerRequestStatus: {
+        type: String,
+        enum: [null, 'pending', 'approved', 'rejected'],
+        default: null
+    },
+    // Admin có thể khóa tài khoản
+    isBanned: {
+        type: Boolean,
+        default: false
+    },
+    // Lý do bị khóa
+    banReason: {
+        type: String,
+        trim: true
+    }
 }, {
     timestamps: true,
 });

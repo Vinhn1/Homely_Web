@@ -34,7 +34,9 @@ const createPriceIcon = (price, isActive) => {
 function ChangeView({ center, zoom }) {
   const map = useMap();
   useEffect(() => {
-    if (center) {
+    // Chỉ flyTo nếu center là mảng có 2 phần tử số hợp lệ
+    if (center && Array.isArray(center) && 
+        Number.isFinite(center[0]) && Number.isFinite(center[1])) {
       map.flyTo(center, zoom, { duration: 1.5 });
     }
   }, [center, zoom, map]);
@@ -44,14 +46,35 @@ function ChangeView({ center, zoom }) {
 const PropertyMap = ({ properties, onMarkerClick, activeId }) => {
   // Default to center of Vĩnh Long
   const defaultCenter = [10.2533, 105.9722];
-  const center = properties.length > 0 && properties[0].location.coordinates
-    ? [properties[0].location.coordinates.lat, properties[0].location.coordinates.lng]
-    : defaultCenter;
+  
+  // Defensive check for center
+  const getCenter = () => {
+    if (properties && properties.length > 0) {
+      const firstWithCoords = properties.find(p => {
+        const lat = parseFloat(p.location?.coordinates?.lat);
+        const lng = parseFloat(p.location?.coordinates?.lng);
+        return Number.isFinite(lat) && Number.isFinite(lng);
+      });
+
+      if (firstWithCoords) {
+        return [
+          parseFloat(firstWithCoords.location.coordinates.lat),
+          parseFloat(firstWithCoords.location.coordinates.lng)
+        ];
+      }
+    }
+    return defaultCenter;
+  };
+
+  const center = getCenter();
+  const isValidCenter = center && Number.isFinite(center[0]) && Number.isFinite(center[1]);
+  const safeCenter = isValidCenter ? center : defaultCenter;
 
   return (
-    <div className="w-full h-full rounded-3xl overflow-hidden shadow-inner border-4 border-white relative">
+    <div className="w-full h-full rounded-3xl overflow-hidden shadow-inner border-4 border-white relative bg-slate-100">
       <MapContainer
-        center={center}
+        key={`${safeCenter[0]}-${safeCenter[1]}`} // Force re-render if center changes
+        center={safeCenter}
         zoom={13}
         scrollWheelZoom={true}
         className="w-full h-full z-0"
@@ -61,20 +84,20 @@ const PropertyMap = ({ properties, onMarkerClick, activeId }) => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
 
-        <ChangeView center={center} zoom={13} />
+        <ChangeView center={safeCenter} zoom={13} />
 
         {properties.map((property) => {
-          if (!property.location?.coordinates?.lat) return null;
+          const lat = parseFloat(property.location?.coordinates?.lat);
+          const lng = parseFloat(property.location?.coordinates?.lng);
+          
+          if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
 
           const isActive = activeId === property._id;
           
           return (
             <Marker
               key={property._id}
-              position={[
-                property.location.coordinates.lat,
-                property.location.coordinates.lng,
-              ]}
+              position={[lat, lng]}
               icon={createPriceIcon(property.price, isActive)}
               eventHandlers={{
                 click: () => onMarkerClick(property._id),
@@ -83,7 +106,7 @@ const PropertyMap = ({ properties, onMarkerClick, activeId }) => {
               <Popup className="custom-popup">
                 <div className="w-48 p-1">
                   <img
-                    src={property.images[0]}
+                    src={property.images?.[0] || "https://placehold.co/400x300?text=Homely"}
                     alt={property.title}
                     className="w-full h-24 object-cover rounded-lg mb-2"
                   />

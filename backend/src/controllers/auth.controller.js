@@ -112,12 +112,18 @@ export const signIn = async(req, res) => {
         return res.status(200).json({message: `Chào mừng ${user.displayName} đã quay trở lại`, 
         accessToken, 
         user: {
-            id: user.id,
+            id: user._id,
             username: user.username,
             email: user.email,
             displayName: user.displayName,
             role: user.role,
-            avatarUrl: user.avatarUrl
+            avatarUrl: user.avatarUrl,
+            phone: user.phone,
+            bio: user.bio,
+            ownerRequestStatus: user.ownerRequestStatus,
+            isBanned: user.isBanned,
+            banReason: user.banReason,
+            createdAt: user.createdAt
         }});
 
     }catch(error){
@@ -126,6 +132,42 @@ export const signIn = async(req, res) => {
     }
 }
 
-export const getMe = (req, res) => {
-    return res.status(200).json({user: req.user});
+// GET /api/auth/me — Luôn lấy data MỚI NHẤT từ DB
+export const getMe = async (req, res) => {
+    try {
+        // Query lại từ DB để luôn có role/ban status mới nhất
+        const freshUser = await User.findById(req.user._id).select('-hashedPassword');
+        if (!freshUser) {
+            return res.status(404).json({ message: 'Người dùng không tồn tại.' });
+        }
+        return res.status(200).json({ user: freshUser });
+    } catch (error) {
+        return res.status(500).json({ message: 'Lỗi hệ thống' });
+    }
 }
+
+// POST /api/auth/request-owner — User xin trở thành chủ nhà (chờ admin duyệt)
+export const requestOwnerRole = async (req, res) => {
+    try {
+        const user = req.user;
+        if (user.role === 'owner') {
+            return res.status(400).json({ message: 'Bạn đã là chủ nhà rồi.' });
+        }
+        if (user.role === 'admin') {
+            return res.status(400).json({ message: 'Admin không cần đăng ký vai trò này.' });
+        }
+        if (user.ownerRequestStatus === 'pending') {
+            return res.status(400).json({ message: 'Yêu cầu của bạn đang chờ admin phê duyệt.' });
+        }
+
+        user.ownerRequestStatus = 'pending';
+        await user.save();
+
+        res.status(200).json({ 
+            success: true, 
+            message: 'Yêu cầu trở thành chủ nhà đã được gửi! Admin sẽ phê duyệt trong vòng 24 giờ.' 
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

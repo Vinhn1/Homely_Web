@@ -18,8 +18,6 @@ export const useAuthStore = create((set) => ({
       const response = await authService.signUp(userData);
 
       set({
-        user: response.user,
-        isAuthenticated: true,
         isLoading: false
       });
 
@@ -47,8 +45,13 @@ export const useAuthStore = create((set) => ({
         localStorage.setItem("accessToken", response.accessToken);
       }
 
+      const userData = response.user;
+      if (userData && !userData.id && userData._id) {
+        userData.id = userData._id;
+      }
+
       set({
-        user: response.user,
+        user: userData,
         isAuthenticated: true,
         isLoading: false
       });
@@ -74,8 +77,14 @@ export const useAuthStore = create((set) => ({
     try{
       const response = await authService.getMe();
 
+      // Chuẩn hóa dữ liệu user (đảm bảo luôn có id từ _id)
+      const userData = response.user;
+      if (userData && !userData.id && userData._id) {
+        userData.id = userData._id;
+      }
+
       set({
-        user: response.user,
+        user: userData,
         isAuthenticated: true,
         isCheckingAuth: false
       });
@@ -112,8 +121,13 @@ export const useAuthStore = create((set) => ({
       // Gọi Service 
       const response = await authService.updateProfile(formData);
       // Cập nhật biến user 
+      const userData = response.user;
+      if (userData && !userData.id && userData._id) {
+        userData.id = userData._id;
+      }
+
       set({
-        user: response.user, // 'user' là key mà Backend trả về (ở user.controller.js)
+        user: userData, // 'user' là key mà Backend trả về (ở user.controller.js)
         isLoading: false
       })
     }catch(error){

@@ -5,22 +5,25 @@ import {
   MapPin, Star, Maximize, Shield, Clock, Users, 
   Wifi, Wind, ArrowUpCircle, Utensils, Box, Info as InfoIcon,
   ChevronLeft, ChevronRight, Calendar, MessageSquare, 
-  CheckCircle2, Share2, Heart, ShieldCheck, Send, Loader2
+  CheckCircle2, Share2, Heart, ShieldCheck, Send, Loader2, Flag, X
 } from "lucide-react";
 import { usePropertyStore } from "@/store/propertyStore";
 import { useAuthStore } from "@/store/authStore";
 import { useBookingStore } from "@/store/bookingStore";
+import { useChatStore } from "@/store/chatStore";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { toast } from "sonner";
+import axios from "@/api/axios";
 
 const PropertyDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { fetchPropertyById, selectedProperty, isLoading, error, addReview } = usePropertyStore();
+  const { fetchPropertyById, selectedProperty, isLoading, error, addReview, favorites, toggleFavorite } = usePropertyStore();
   const { user, isAuthenticated } = useAuthStore();
   const { createBooking, isLoading: isBookingLoading } = useBookingStore();
+  const { getOrCreateConversation } = useChatStore();
   
   const [activeImage, setActiveImage] = useState(0);
   
@@ -34,6 +37,22 @@ const PropertyDetailPage = () => {
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
+  // Report Modal State
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportDescription, setReportDescription] = useState('');
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+
+  const REPORT_REASONS = [
+    'Thông tin sai lệch',
+    'Ảnh giả mạo / không đúng thực tế',
+    'Giá cả gian lận',
+    'Nội dung không phù hợp',
+    'Lừa đảo / scam',
+    'Vi phạm quy định cộng đồng',
+    'Khác'
+  ];
 
   // Logic tự động lướt ảnh
   const nextImage = useCallback(() => {
@@ -79,6 +98,29 @@ const PropertyDetailPage = () => {
     }
   };
 
+  const handleReportSubmit = async () => {
+    if (!isAuthenticated) return toast.error('Vui lòng đăng nhập để báo cáo');
+    if (!reportReason) return toast.error('Vui lòng chọn lý do báo cáo');
+
+    setIsSubmittingReport(true);
+    try {
+      await axios.post('/reports', {
+        targetType: 'property',
+        targetId: id,
+        reason: reportReason,
+        description: reportDescription
+      });
+      toast.success('✅ Báo cáo đã được gửi!');
+      setShowReportModal(false);
+      setReportReason('');
+      setReportDescription('');
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Có lỗi xảy ra khi gửi báo cáo');
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
+
   const handleBookingSubmit = async () => {
     if (!isAuthenticated) return toast.error("Vui lòng đăng nhập để đặt phòng");
     if (!moveInDate) return toast.error("Vui lòng chọn ngày dọn vào");
@@ -97,6 +139,19 @@ const PropertyDetailPage = () => {
       }, 1500);
     } else {
       toast.error(result.message);
+    }
+  };
+
+  const handleChatWithOwner = async () => {
+    if (!isAuthenticated) return toast.error("Vui lòng đăng nhập để nhắn tin");
+    if (!selectedProperty?.owner) return toast.error("Thông tin chủ nhà không khả dụng");
+    if (user?.id === selectedProperty.owner._id) return toast.error("Bạn không thể nhắn tin với chính mình");
+
+    try {
+      await getOrCreateConversation(selectedProperty.owner._id);
+      navigate("/dashboard/messages");
+    } catch (error) {
+      toast.error("Không thể khởi tạo cuộc trò chuyện");
     }
   };
 
@@ -161,12 +216,44 @@ const PropertyDetailPage = () => {
           </nav>
 
           <div className="flex items-center gap-3">
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
+            <button
+              onClick={async () => {
+                const url = window.location.href;
+                if (navigator.share) {
+                  try {
+                    await navigator.share({ title: property.title, url });
+                  } catch {}
+                } else {
+                  await navigator.clipboard.writeText(url);
+                  toast.success('Đã sao chép link vào clipboard!');
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all shadow-sm"
+            >
               <Share2 size={18} /> Chia sẻ
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all shadow-sm">
-              <Heart size={18} /> Lưu lại
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                toggleFavorite(property._id);
+                toast.success(favorites.includes(property._id) ? 'Đã bỏ khỏi danh sách yêu thích' : 'Đã thêm vào yêu thích ❤️');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm border ${
+                favorites.includes(property._id)
+                  ? 'bg-red-50 border-red-200 text-red-500'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
+            >
+              <Heart size={18} fill={favorites.includes(property._id) ? 'currentColor' : 'none'} /> Lưu lại
             </button>
+            {isAuthenticated && user?._id !== property.owner?._id && (
+              <button
+                onClick={() => setShowReportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-100 rounded-xl text-red-500 text-sm font-bold hover:bg-red-100 transition-all shadow-sm"
+              >
+                <Flag size={16} /> Báo cáo
+              </button>
+            )}
           </div>
         </div>
 
@@ -301,14 +388,15 @@ const PropertyDetailPage = () => {
             <div className="space-y-6">
               <h2 className="text-xl font-black text-slate-900">Tiện ích đi kèm</h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {displayAmenities.map((name, idx) => {
-                  const Icon = getAmenityIcon(name);
+                {displayAmenities.map((amenity, idx) => {
+                  const amenityName = typeof amenity === 'object' ? amenity.name : amenity;
+                  const Icon = getAmenityIcon(amenityName);
                   return (
                     <div key={idx} className="flex items-center gap-3 p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:border-blue-200 transition-all">
                       <div className="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center">
                         <Icon size={16} />
                       </div>
-                      <span className="text-sm font-bold text-slate-700">{name}</span>
+                      <span className="text-sm font-bold text-slate-700">{amenityName}</span>
                       <CheckCircle2 size={14} className="ml-auto text-blue-500" />
                     </div>
                   );
@@ -512,7 +600,10 @@ const PropertyDetailPage = () => {
                         "Thuê ngay"
                       )}
                     </button>
-                    <button className="w-full py-5 bg-white text-slate-600 border border-slate-200 rounded-[24px] font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-sm">
+                    <button 
+                      onClick={handleChatWithOwner}
+                      className="w-full py-5 bg-white text-slate-600 border border-slate-200 rounded-[24px] font-black hover:bg-slate-50 transition-all flex items-center justify-center gap-3 text-sm uppercase tracking-widest shadow-sm"
+                    >
                       <MessageSquare size={18} className="text-blue-500" />
                       Nhắn tin với chủ nhà
                     </button>
@@ -541,6 +632,76 @@ const PropertyDetailPage = () => {
       </main>
 
       <Footer />
+
+      {/* Report Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl p-8 max-w-lg w-full shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-50 rounded-2xl flex items-center justify-center">
+                  <Flag className="w-5 h-5 text-red-500" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-black text-slate-900">Báo cáo vi phạm</h3>
+                  <p className="text-xs text-slate-400 mt-0.5">Giúp chúng tôi giữ cho Homely an toàn</p>
+                </div>
+              </div>
+              <button onClick={() => setShowReportModal(false)} className="w-8 h-8 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all">
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Reason Selection */}
+            <div className="space-y-2 mb-5">
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Chọn lý do *</label>
+              <div className="grid grid-cols-1 gap-2">
+                {REPORT_REASONS.map(reason => (
+                  <button
+                    key={reason}
+                    onClick={() => setReportReason(reason)}
+                    className={`text-left px-4 py-3 rounded-xl border-2 text-sm font-bold transition-all ${
+                      reportReason === reason
+                        ? 'border-red-400 bg-red-50 text-red-600'
+                        : 'border-slate-100 text-slate-600 hover:border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    {reason}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-2 mb-6">
+              <label className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Mô tả thêm (tùy chọn)</label>
+              <textarea
+                value={reportDescription}
+                onChange={e => setReportDescription(e.target.value)}
+                placeholder="Cung cấp thêm chi tiết để chúng tôi xem xét nhanh hơn..."
+                rows={3}
+                className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 text-sm resize-none focus:outline-none focus:border-red-200 transition-colors"
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => { setShowReportModal(false); setReportReason(''); setReportDescription(''); }}
+                className="flex-1 py-3 rounded-2xl border-2 border-slate-100 font-bold text-slate-500 hover:bg-slate-50 transition-all text-sm"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                onClick={handleReportSubmit}
+                disabled={!reportReason || isSubmittingReport}
+                className="flex-1 py-3 rounded-2xl bg-red-500 text-white font-black hover:bg-red-600 transition-all text-sm disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {isSubmittingReport ? <><Loader2 size={16} className="animate-spin" /> Đang gửi...</> : <><Flag size={16} /> Gửi báo cáo</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

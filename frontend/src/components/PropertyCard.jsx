@@ -1,7 +1,12 @@
-import { MapPin, Maximize, Star, ChevronRight } from "lucide-react";
+import { MapPin, Maximize, Star, ChevronRight, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import { usePropertyStore } from "../store/propertyStore";
+import { motion } from "framer-motion";
 
 const PropertyCard = ({ property, isActive }) => {
+  const { favorites, toggleFavorite } = usePropertyStore();
+  const isFavorite = favorites.includes(property._id);
+
   return (
     <div className={`bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all border group relative ${
       isActive ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-slate-100'
@@ -9,10 +14,29 @@ const PropertyCard = ({ property, isActive }) => {
       {/* 1. Phần Ảnh & Badge */}
       <div className="relative h-48 overflow-hidden">
         <img 
-          src={property.images[0]} 
+          src={property.images?.[0] || "https://placehold.co/600x400?text=No+Image"} 
           alt={property.title}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        
+        {/* Heart button */}
+        <motion.button
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(property._id);
+          }}
+          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-colors z-10 ${
+            isFavorite 
+              ? "bg-red-500 text-white shadow-lg shadow-red-500/30" 
+              : "bg-white/70 text-slate-400 hover:text-red-500 hover:bg-white"
+          }`}
+        >
+          <Heart size={18} fill={isFavorite ? "currentColor" : "none"} strokeWidth={2.5} />
+        </motion.button>
+
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           {property.status === "Còn phòng" && (
             <span className="bg-emerald-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase">
@@ -42,7 +66,7 @@ const PropertyCard = ({ property, isActive }) => {
 
         <div className="flex items-center gap-1 text-slate-500 text-sm mb-4">
           <MapPin size={14} />
-          <span className="truncate">{property.location.district}, {property.location.city}</span>
+          <span className="truncate">{property.location.district?.name || property.location.district}, {property.location.city}</span>
         </div>
 
         {/* 3. Thông số kỹ thuật & Nút Chi tiết */}

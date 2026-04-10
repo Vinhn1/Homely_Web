@@ -1,22 +1,33 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { usePropertyStore } from "../store/propertyStore";
 import PropertyCard from "../components/PropertyCard";
+import PropertyCardSkeleton from "../components/PropertyCardSkeleton";
 import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import PropertyMap from "../components/PropertyMap";
-import { SlidersHorizontal, Map as MapIcon, LayoutGrid, Loader } from "lucide-react";
+import { SlidersHorizontal, Map as MapIcon, LayoutGrid, ChevronLeft, ChevronRight } from "lucide-react";
 
 const SearchPage = () => {
-  const { properties, fetchProperties, isLoading } = usePropertyStore();
+  const { properties, fetchProperties, isLoading, pagination } = usePropertyStore();
   const [activePropertyId, setActivePropertyId] = React.useState(null);
+  const [currentFilters, setCurrentFilters] = useState({});
 
   // 1. Khởi động: Gọi dữ liệu ngay khi trang vừa load
   useEffect(() => {
-    fetchProperties();
+    fetchProperties({ page: 1 });
   }, [fetchProperties]);
 
   const handleSearch = (filters) => {
-    fetchProperties(filters);
+    const newFilters = { ...filters, page: 1 };
+    setCurrentFilters(filters);
+    fetchProperties(newFilters);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > pagination.totalPages) return;
+    fetchProperties({ ...currentFilters, page: newPage });
+    // Scroll lên đầu danh sách
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -32,7 +43,12 @@ const SearchPage = () => {
                 Khám phá chỗ ở
               </h1>
               <p className="text-slate-500 text-sm font-medium">
-                Tìm thấy <span className="text-blue-600 font-bold">{properties.length}</span> kết quả phù hợp với yêu cầu của bạn
+                Tìm thấy <span className="text-blue-600 font-bold">{pagination.total}</span> kết quả
+                {pagination.totalPages > 1 && (
+                  <span className="text-slate-400 ml-1">
+                    — Trang {pagination.page}/{pagination.totalPages}
+                  </span>
+                )}
               </p>
             </div>
 
@@ -54,7 +70,7 @@ const SearchPage = () => {
             </div>
           </div>
 
-          {/* Real Search Bar Integration */}
+          {/* Search Bar */}
           <div className="max-w-5xl mx-auto w-full -mb-4 relative z-10">
              <SearchBar onSearch={handleSearch} />
           </div>
@@ -66,27 +82,86 @@ const SearchPage = () => {
           {/* Cột trái: Lưới hiển thị các căn hộ (60%) */}
           <div className="w-full lg:w-[60%]">
             {isLoading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-pulse">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="h-[380px] bg-slate-200 rounded-2xl"></div>
+              // Skeleton Loading với đúng số lượng cards
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <PropertyCardSkeleton key={i} />
                 ))}
+              </div>
+            ) : properties.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 bg-white rounded-2xl border border-dashed border-slate-200">
+                <p className="text-4xl mb-4">🏠</p>
+                <p className="text-slate-500 font-medium">Không tìm thấy kết quả phù hợp</p>
+                <p className="text-slate-400 text-sm mt-1">Hãy thử thay đổi bộ lọc tìm kiếm</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {properties.map((item) => (
-                  <div 
-                    key={item._id} 
-                    id={`property-${item._id}`}
-                    onMouseEnter={() => setActivePropertyId(item._id)}
-                    onMouseLeave={() => setActivePropertyId(null)}
-                  >
-                    <PropertyCard 
-                      property={item} 
-                      isActive={activePropertyId === item._id} 
-                    />
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {properties.map((item) => (
+                    <div 
+                      key={item._id} 
+                      id={`property-${item._id}`}
+                      onMouseEnter={() => setActivePropertyId(item._id)}
+                      onMouseLeave={() => setActivePropertyId(null)}
+                    >
+                      <PropertyCard 
+                        property={item} 
+                        isActive={activePropertyId === item._id} 
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pagination Controls */}
+                {pagination.totalPages > 1 && (
+                  <div className="flex items-center justify-center gap-3 mt-8">
+                    <button
+                      onClick={() => handlePageChange(pagination.page - 1)}
+                      disabled={pagination.page <= 1}
+                      className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                    >
+                      <ChevronLeft size={18} />
+                    </button>
+
+                    {/* Page numbers */}
+                    <div className="flex items-center gap-1">
+                      {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                        .filter(p => p === 1 || p === pagination.totalPages || Math.abs(p - pagination.page) <= 1)
+                        .reduce((acc, p, idx, arr) => {
+                          if (idx > 0 && arr[idx - 1] !== p - 1) acc.push('...');
+                          acc.push(p);
+                          return acc;
+                        }, [])
+                        .map((item, idx) =>
+                          item === '...' ? (
+                            <span key={`ellipsis-${idx}`} className="px-2 text-slate-400">…</span>
+                          ) : (
+                            <button
+                              key={item}
+                              onClick={() => handlePageChange(item)}
+                              className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${
+                                item === pagination.page
+                                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                              }`}
+                            >
+                              {item}
+                            </button>
+                          )
+                        )
+                      }
+                    </div>
+
+                    <button
+                      onClick={() => handlePageChange(pagination.page + 1)}
+                      disabled={pagination.page >= pagination.totalPages}
+                      className="w-10 h-10 bg-white border border-slate-200 rounded-xl flex items-center justify-center text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm"
+                    >
+                      <ChevronRight size={18} />
+                    </button>
                   </div>
-                ))}
-              </div>
+                )}
+              </>
             )}
           </div>
 

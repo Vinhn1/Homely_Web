@@ -5,16 +5,14 @@ import {
 } from "lucide-react";
 
 const Sidebar = () => {
-    const { logout } = useAuthStore();
-    const location = useLocation();
     const [searchParams] = useSearchParams();
     const activeTab = searchParams.get("tab") || "personal";
+    const isAdmin = useAuthStore.getState().user?.role === 'admin';
 
     const menuItems = [
         { id: "personal", label: "Thông tin cá nhân", icon: User, path: "/dashboard/profile?tab=personal" },
-        { id: "saved", label: "Nhà đã lưu", icon: Heart, path: "/dashboard/profile?tab=saved" },
         { id: "history", label: "Đã đặt", icon: Calendar, path: "/dashboard/profile?tab=history" },
-        { id: "reviews", label: "Đánh giá của tôi", icon: Star, path: "/dashboard/profile?tab=reviews" },
+        ...(isAdmin ? [{ id: "admin", label: "Quản trị hệ thống", icon: ShieldCheck, path: "/admin" }] : []),
         { id: "support", label: "Yêu cầu hỗ trợ", icon: LifeBuoy, path: "/dashboard/profile?tab=support" },
         { id: "security", label: "Bảo mật & 2FA", icon: ShieldCheck, path: "/dashboard/profile?tab=security" },
         { id: "notifications", label: "Thông báo", icon: Bell, path: "/dashboard/profile?tab=notifications" },

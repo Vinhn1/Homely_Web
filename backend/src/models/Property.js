@@ -1,118 +1,149 @@
 import mongoose from 'mongoose';
 
 const propertySchema = new mongoose.Schema({
-     // Thông tin cơ bản 
-     // Tiêu đề bài đăng
+    // ===== Thông tin cơ bản =====
     title: {
         type: String,
-        required: true
+        required: true,
+        maxlength: 100
     },
-    // Mô tả chi tiết
     description: {
         type: String,
         required: true
     },
-    // Giá thuê mỗi tháng
     price: {
         type: Number,
         required: true
     },
-    // Phân loại & Trạng thái (Dùng cho các Badge hiển thị)
-    property:{
-        type: String,
-        enum: ["Căn hộ", "Phòng trọ", "Nhà nguyên căn", "Chung cư"],
-        default: "Phòng trọ"
+
+    // ===== Phân loại & Trạng thái =====
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
+        required: true
     },
+    // Trạng thái phòng (cho thuê được chưa)
     status: {
         type: String,
-        enum: ["Còn phòng", "Đã thuê", "Bảo trì"], 
+        enum: ["Còn phòng", "Đã thuê", "Bảo trì"],
         default: "Còn phòng"
     },
-    // Badge "Đã xác thực"
+    // Trạng thái bài đăng (owner quản lý)
+    listingStatus: {
+        type: String,
+        enum: ["active", "hidden", "expired"],
+        default: "active"
+    },
+    // Ngày hết hạn tin đăng (30 ngày)
+    expiresAt: {
+        type: Date,
+        default: () => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
+    },
+
+    // ===== Badges =====
     isVerified: {
         type: Boolean,
         default: false
     },
-    // Badge "Phổ biến"
     isPopular: {
         type: Boolean,
         default: false
     },
-    // Thông số kỹ thuật (Dùng cho Quick Stats Bar)
-    // Diện tích (m2)
+    isPromoted: {
+        type: Boolean,
+        default: false
+    },
+
+    // ===== Thông số kỹ thuật =====
     area: {
         type: Number,
         required: true
     },
-    // Thời gian thuê tối thiểu
+    bedroom: {
+        type: Number,
+        default: 1
+    },
+    bathroom: {
+        type: Number,
+        default: 1
+    },
+    floor: {
+        type: Number,
+        default: 1
+    },
     minLease: {
         type: String,
         default: "6 Tháng"
     },
-    // Sức chứa tối đa (người)
     capacity: {
         type: Number,
         default: 1
     },
-    // Thông tin an ninh
     security: {
         type: String,
         default: "24/7"
     },
-    // Tiện ích [wifi, máy lạnh, thang máy, tủ lạnh...]
+    legalDocs: {
+        type: String,
+        default: "Hợp đồng thuê"
+    },
+
+    // ===== Tiện ích =====
     amenities: [{
-        type: String
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Amenity"
     }],
-    // Hình ảnh
+
+    // ===== Hình ảnh =====
     images: [{
         type: String
     }],
-    // Vị trí
+
+    // ===== Vị trí =====
     location: {
-        // Số nhà, tên đường
         address: {
             type: String,
             required: true
         },
+        district: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "District"
+        },
         city: {
             type: String,
             required: true,
-            default: "Vĩnh Long"
+            default: "Hồ Chí Minh"
         },
         coordinates: {
-            // Kinh độ (X phục vụ bản đồ)
-            lat: {
-                type: Number
-            },
-            // Vĩ độ (Y)
-            lng: {
-                type: Number
-            }
+            lat: { type: Number },
+            lng: { type: Number }
         },
     },
-    // Chủ sở hữu (Liên kết với bảng User để biết ai đăng bài)
+
+    // ===== Chủ sở hữu =====
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
         required: true,
     },
-    // Đánh giá 
+
+    // ===== Thống kê =====
+    viewCount: {
+        type: Number,
+        default: 0
+    },
     rating: {
         type: Number,
-        default: 0 // Điểm TB (4.8)
+        default: 0
     },
     reviewCount: {
         type: Number,
         default: 0
     }
-    
 
-}, 
-{ 
-    // Tự động tạo createdAt và updatedAt
+}, {
     timestamps: true
-} 
-);
+});
 
 const Property = mongoose.model("Property", propertySchema);
 export default Property;

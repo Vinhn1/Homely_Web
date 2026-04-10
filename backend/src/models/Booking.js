@@ -11,6 +11,12 @@ const bookingSchema = new mongoose.Schema({
         ref: 'User',
         required: true
     },
+    // Ref nhanh đến chủ nhà (tránh lookup ông trên property)
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
     moveInDate: {
         type: Date,
         required: true
@@ -29,7 +35,17 @@ const bookingSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    // Số điện thoại liên hệ của tenant
+    contactPhone: {
+        type: String,
+        trim: true
+    },
     note: {
+        type: String,
+        trim: true
+    },
+    // Lý do hủy (nếu có)
+    cancelReason: {
         type: String,
         trim: true
     }

@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 import { useAuthStore } from "../../../store/authStore";
 import { 
   Camera, MapPin, Mail, Phone, User, 
-  CheckCircle2, Settings, LogOut
+  CheckCircle2, Settings, LogOut, ShieldCheck
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Sidebar from "@/components/dashbroad/Sidebar";
@@ -208,9 +208,15 @@ const ProfilePage = () => {
             </div>
             
             <div className="flex flex-wrap justify-center md:justify-start gap-3">
-              <span className="px-5 py-2 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100">
-                {user?.role === "owner" ? "Chủ trọ" : "Người thuê"}
-              </span>
+              {user?.role === "admin" ? (
+                <span className="px-5 py-2 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg">
+                  Quản trị viên
+                </span>
+              ) : (
+                <span className="px-5 py-2 bg-blue-600 text-white rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-100">
+                  {user?.role === "owner" ? "Chủ trọ" : "Người thuê"}
+                </span>
+              )}
               <span className="px-5 py-2 bg-white text-emerald-600 rounded-full text-[10px] font-black uppercase tracking-widest border border-emerald-100 shadow-sm">
                 Đã xác minh tài khoản
               </span>
@@ -218,9 +224,19 @@ const ProfilePage = () => {
           </div>
 
           <div className="flex flex-col gap-3 min-w-[200px]">
-            <button className="w-full py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-full font-black text-xs hover:bg-blue-50 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1 active:scale-95">
-              Trở thành Chủ trọ
-            </button>
+            {user?.role === "admin" ? (
+              <button 
+                onClick={() => navigate("/admin")}
+                className="w-full py-4 bg-emerald-600 text-white rounded-full font-black text-xs hover:bg-emerald-700 transition-all shadow-lg hover:-translate-y-1 active:scale-95 flex items-center justify-center gap-2"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                Vào trang Quản trị
+              </button>
+            ) : (
+              <button className="w-full py-4 bg-white border-2 border-blue-600 text-blue-600 rounded-full font-black text-xs hover:bg-blue-50 transition-all shadow-sm hover:shadow-lg hover:-translate-y-1 active:scale-95">
+                Trở thành Chủ trọ
+              </button>
+            )}
             <div className="flex gap-3">
               <button className="flex-1 py-4 bg-white border border-slate-200 rounded-full text-slate-400 hover:text-blue-600 hover:border-blue-600 transition-all shadow-sm flex items-center justify-center">
                 <Settings className="w-5 h-5" />

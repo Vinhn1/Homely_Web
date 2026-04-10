@@ -2,30 +2,51 @@ import { create } from 'zustand';
 import axios from '../api/axios';
 
 export const usePropertyStore = create((set) => ({
+    // Danh sách ID bất động sản yêu thích
+    favorites: JSON.parse(localStorage.getItem('homely_favorites')) || [],
     // Danh sách phòng hiển thị trên màn hình 
     properties: [],
     // Căn hộ đang được xem chi tiết
     selectedProperty: null,
     isLoading: false,
     error: null,
+    // Pagination metadata
+    pagination: { page: 1, totalPages: 1, total: 0, limit: 12 },
 
-    // Hàm gọi API lấy danh sách (có hỗ trợ lọc)
+    // Hàm gọi API lấy danh sách (có hỗ trợ lọc + pagination)
     fetchProperties: async (filters = {}) => {
         set({isLoading: true, error: null});
         try{
-             // Chuyển đối tượng filters {city: 'Vinh Long'} thành query string "?city=VinhLong"
              const response = await axios.get("/properties", {params: filters});
              set({
                 properties: response.data.data,
+                pagination: {
+                    page: response.data.page || 1,
+                    totalPages: response.data.totalPages || 1,
+                    total: response.data.total || 0,
+                    limit: response.data.limit || 12,
+                },
                 isLoading: false
              });
-
         }catch(error){
             set({
                 error: error.response?.data?.message || "Lỗi tải dữ liệu",
-                isLoading: true
+                isLoading: false
             });
         }
+    },
+
+    // Hàm toggle yêu thích
+    toggleFavorite: (propertyId) => {
+        set((state) => {
+            const isFavorite = state.favorites.includes(propertyId);
+            const newFavorites = isFavorite
+                ? state.favorites.filter(id => id !== propertyId)
+                : [...state.favorites, propertyId];
+            
+            localStorage.setItem('homely_favorites', JSON.stringify(newFavorites));
+            return { favorites: newFavorites };
+        });
     },
 
     // Hàm lấy chi tiết 1 căn hộ theo ID 

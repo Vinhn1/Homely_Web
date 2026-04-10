@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom"; // Cần thiết cho các thẻ <Link>
+import { Link, useNavigate, useLocation } from "react-router-dom"; // Cần thiết cho các thẻ <Link>
 import { 
   Mail, 
   Lock, 
@@ -20,6 +20,8 @@ import { toast } from "sonner";
 
 const SignInPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   // Lấy hàm signin và biến isloading từ Zustand 
   const {signIn, isLoading} = useAuthStore();
   // 1. Thêm 'errors' và 'isLoading' để không bị báo lỗi "not defined"
@@ -35,7 +37,7 @@ const SignInPage = () => {
       });
     
       toast.success("Đăng nhập thành công! Chào mừng bạn quay lại.");
-      navigate("/");
+      navigate(from, { replace: true });
 
     }catch(error){
       
