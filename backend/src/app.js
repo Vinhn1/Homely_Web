@@ -26,11 +26,29 @@ const globalLimiter = rateLimit({
     skip: (req) => req.path.startsWith('/api/properties') && req.method === 'GET', // Bỏ qua public search
 });
 
-// Sử dụng Middleware
+// Cấu hình các domain được phép truy cập
+const allowedOrigins = [
+    process.env.FRONTEND_URL,
+    "http://localhost:5173",
+];
+
+// Sử dùng Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: function (origin, callback) {
+        // Cho phép các request không có origin (như Postman hoặc mobile app)
+        if (!origin) return callback(null, true);
+        
+        // Kiểm tra xem origin có nằm trong danh sách hoặc là link preview của Vercel không
+        const isAllowed = allowedOrigins.includes(origin) || origin.endsWith(".vercel.app");
+        
+        if (isAllowed) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true
 }));
 app.use(globalLimiter);
@@ -56,7 +74,13 @@ const httpServer = createServer(app);
 // Khởi tạo Socket.IO
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.FRONTEND_URL || "http://localhost:5173",
+        origin: function (origin, callback) {
+            if (!origin || allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+                callback(null, true);
+            } else {
+                callback(new Error('Not allowed by CORS'));
+            }
+        },
         methods: ["GET", "POST"],
         credentials: true
     }
