@@ -16,7 +16,9 @@ const router = express.Router();
 
 // Đ/N tuyến đường
 router.post('/signUp', authLimiter, signUp);
+router.post('/signup', authLimiter, signUp); // Alias
 router.post('/signIn', authLimiter, signIn);
+router.post('/signin', authLimiter, signIn); // Alias
 router.get('/me', protect, getMe);
 router.post('/request-owner', protect, requestOwnerRole);
 
