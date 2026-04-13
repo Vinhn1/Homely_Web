@@ -126,18 +126,4 @@ npm run dev
 
 ---
 
-## 📄 Giấy phép
 
-Phân phối theo Giấy phép MIT. Xem `LICENSE` để biết thêm thông tin.
-
----
-
-<div align="center">
-
-**Được xây dựng với 💖 bởi [Hoang Vinh](https://github.com/vinhn1)**
-
-*Dự án tâm huyết phục vụ danh mục đầu tư (Portfolio) và định hướng Intern/Junior Fullstack Developer.*
-
-[![GitHub followers](https://img.shields.io/github/followers/vinhn1?style=social)](https://github.com/vinhn1)
-
-</div>
